@@ -1,0 +1,12 @@
+{
+  "name": "mongoose-benchmark",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "benchmark": "2.1.4",
+    "mongoose5.0.17": "npm:mongoose@5.0.17",
+    "mongoose5.13.3": "npm:mongoose@5.13.3"
+  }
+}

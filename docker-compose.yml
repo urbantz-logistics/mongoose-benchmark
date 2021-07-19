@@ -1,0 +1,5 @@
+services:
+  mongodb4:
+    image: mongo:4
+  mongodb5:
+    image: mongo:5
