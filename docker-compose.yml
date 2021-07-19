@@ -3,3 +3,14 @@ services:
     image: mongo:4
   mongodb5:
     image: mongo:5
+  mongoose-benchmark:
+    container_name: "mongoose-benchmark"
+    depends_on:
+      - mongodb4
+      - mongodb5
+    links:
+      - mongodb5
+      - mongodb4
+    build: .
+
+
