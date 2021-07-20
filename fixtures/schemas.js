@@ -134,7 +134,8 @@ const bigSchema = {
                 amount: { type: Number, required: true },
             },
         ],
-    },}
+    },
+}
 
 module.exports = {
     smallSchema,
