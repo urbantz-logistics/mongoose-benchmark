@@ -15,16 +15,12 @@ const smallSchemaCreateBenchmark = async (mongoUri) => {
     });
     await mongooseV5017.connect(mongoUri);
     await mongooseV5133.connect(mongoUri);
+    const modelV5017 = mongooseV5017.model('SmallSchemaModel', mongooseV5017.Schema(smallSchema))
+    const modelV5133 = mongooseV5133.model('SmallSchemaModel', mongooseV5133.Schema(smallSchema))
     suite.add('MongooseV5017 insert', {
         defer: true,
-        fn: async function (deferred) {
-            let model
-            if (!mongooseV5017SmallSchemaTestInit) {
-                mongooseV5017SmallSchemaTestInit = true;
-                model = mongooseV5017.model('SmallSchemaModel', mongooseV5017.Schema(smallSchema))
-                
-            }
-            create(model, {
+        fn: function (deferred) {
+            create(modelV5017, {
                 createdAt: Date.now(),
                 expire: Date.now(),
                 isActive: false
@@ -34,13 +30,8 @@ const smallSchemaCreateBenchmark = async (mongoUri) => {
 
     suite.add('MongooseV5133 insert', {
         defer: true,
-        fn: async function (deferred) {
-            let model
-            if (!mongooseV5133SmallSchemaTestInit) {
-                mongooseV5133SmallSchemaTestInit = true
-                model = mongooseV5133.model('SmallSchemaModel', mongooseV5133.Schema(smallSchema))
-            }
-            create(model, {
+        fn: function (deferred) {
+            create(modelV5133, {
                 createdAt: Date.now(),
                 expire: Date.now(),
                 isActive: false
@@ -59,8 +50,6 @@ const smallSchemaCreateBenchmark = async (mongoUri) => {
                 delete mongooseV5017.connection.models['SmallSchemaModel'];
                 mongooseV5017.disconnect();
                 mongooseV5133.disconnect();
-                mongooseV5017SmallSchemaTestInit = false;
-                mongooseV5133SmallSchemaTestInit = false;
                 resolve()
             }).run({'async': true});
     })
@@ -73,27 +62,19 @@ const smallSchemaFindBenchmark = async (mongoUri) => {
     });
     await mongooseV5017.connect(mongoUri);
     await mongooseV5133.connect(mongoUri);
+    const modelV5017 = mongooseV5017.model('SmallSchemaModel', mongooseV5017.Schema(smallSchema))
+    const modelV5133 = mongooseV5133.model('SmallSchemaModel', mongooseV5133.Schema(smallSchema))
     suite.add('MongooseV5017 find', {
         defer: true,
         fn: async function (deferred) {
-            let model
-            if (!mongooseV5017SmallSchemaTestInit) {
-                mongooseV5017SmallSchemaTestInit = true;
-                model = mongooseV5017.model('SmallSchemaModel', mongooseV5017.Schema(smallSchema))
-            }
-            find(model).then(() => deferred.resolve())
+            find(modelV5017).then(() => deferred.resolve())
         }
     })
 
     suite.add('MongooseV5133 find', {
         defer: true,
         fn: async function (deferred) {
-            let model
-            if (!mongooseV5133SmallSchemaTestInit) {
-                mongooseV5133SmallSchemaTestInit = true
-                model = mongooseV5133.model('SmallSchemaModel', mongooseV5133.Schema(smallSchema))
-            }
-            find(model).then(() => deferred.resolve())
+            find(modelV5133).then(() => deferred.resolve())
         }
     })
 
@@ -104,8 +85,6 @@ const smallSchemaFindBenchmark = async (mongoUri) => {
             })
             .on('complete', function () {
                 console.log('Fastest is ' + this.filter('fastest').map('name'));
-                mongooseV5017SmallSchemaTestInit = false;
-                mongooseV5133SmallSchemaTestInit = false;
                 delete mongooseV5133.connection.models['SmallSchemaModel'];
                 delete mongooseV5017.connection.models['SmallSchemaModel'];
                 mongooseV5017.disconnect();
