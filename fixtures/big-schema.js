@@ -121,6 +121,9 @@ const bigSchemaCreateBenchmark = async (mongoUri) => {
     const suite = new Benchmark.Suite(`big-schema-create ${mongoUri}`, {
         maxTime: 1
     });
+    await mongooseV5017.connect(mongoUri);
+    await mongooseV5133.connect(mongoUri);
+
     suite.add('MongooseV5017 insert', {
         defer: true,
         fn: async function (deferred) {
@@ -128,7 +131,6 @@ const bigSchemaCreateBenchmark = async (mongoUri) => {
             if (!mongooseV5017BigSchemaTestInit) {
                 mongooseV5017BigSchemaTestInit = true;
                 model = mongooseV5017.model('BigSchemaModel', mongooseV5017.Schema(bigSchema))
-                await mongooseV5017.connect(mongoUri);
             }
             create(model, taskData).then(() => deferred.resolve())
         }
@@ -141,7 +143,6 @@ const bigSchemaCreateBenchmark = async (mongoUri) => {
             if (!mongooseV5133BigSchemaTestInit) {
                 mongooseV5133BigSchemaTestInit = true
                 model = mongooseV5133.model('BigSchemaModel', mongooseV5133.Schema(bigSchema))
-                await mongooseV5017.connect(mongoUri);
             }
             create(model, taskData).then(() => deferred.resolve())
         }
@@ -156,6 +157,8 @@ const bigSchemaCreateBenchmark = async (mongoUri) => {
                 console.log('Fastest is ' + this.filter('fastest').map('name'));
                 delete mongooseV5133.connection.models['BigSchemaModel'];
                 delete mongooseV5017.connection.models['BigSchemaModel'];
+                mongooseV5017.disconnect();
+                mongooseV5133.disconnect();
                 mongooseV5017BigSchemaTestInit = false;
                 mongooseV5133BigSchemaTestInit = false;
                 resolve()
@@ -168,6 +171,8 @@ const bigSchemaFindBenchmark = async (mongoUri) => {
     const suite = new Benchmark.Suite(`big-schema-find ${mongoUri}`, {
         maxTime: 1
     });
+    await mongooseV5017.connect(mongoUri);
+    await mongooseV5133.connect(mongoUri);
     suite.add('MongooseV5017 find', {
         defer: true,
         fn: async function (deferred) {
@@ -175,7 +180,6 @@ const bigSchemaFindBenchmark = async (mongoUri) => {
             if (!mongooseV5017BigSchemaTestInit) {
                 mongooseV5017BigSchemaTestInit = true;
                 model = mongooseV5017.model('BigSchemaModel', mongooseV5017.Schema(bigSchema))
-                await mongooseV5017.connect(mongoUri);
             }
             find(model).then(() => deferred.resolve())
         }
@@ -188,7 +192,6 @@ const bigSchemaFindBenchmark = async (mongoUri) => {
             if (!mongooseV5133BigSchemaTestInit) {
                 mongooseV5133BigSchemaTestInit = true
                 model = mongooseV5133.model('BigSchemaModel', mongooseV5133.Schema(bigSchema))
-                await mongooseV5017.connect(mongoUri);
             }
             find(model).then(() => deferred.resolve())
         }
@@ -203,6 +206,8 @@ const bigSchemaFindBenchmark = async (mongoUri) => {
                 console.log('Fastest is ' + this.filter('fastest').map('name'));
                 mongooseV5017BigSchemaTestInit = false;
                 mongooseV5133BigSchemaTestInit = false;
+                mongooseV5017.disconnect();
+                mongooseV5133.disconnect();
                 delete mongooseV5133.connection.models['BigSchemaModel'];
                 delete mongooseV5017.connection.models['BigSchemaModel'];
                 resolve()
