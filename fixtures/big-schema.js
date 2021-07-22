@@ -1,9 +1,15 @@
 const Benchmark = require('benchmark');
 const mongooseV5017 = require('mongoose5.0.17')
 const mongooseV5133 = require('mongoose5.13.3')
+const mongooseLeanVirtuals = require('mongoose-lean-virtuals');
 
-const {bigSchema} = require('./schemas');
-const {create, find} = require('../utils/mongoose')
+const mongooseLeanDefaultsPlugin = require('../utils/mongoose-lean-defaults')
+const {bigSchema, usersSchema} = require('./schemas');
+const {create, findAndPopulate} = require('../utils/mongoose')
+const slowQueryProfiler = require('../utils/profiler');
+
+mongooseV5017.plugin(slowQueryProfiler.register);
+mongooseV5133.plugin(slowQueryProfiler.register);
 
 const taskData = {
     associatedName: 'test',
@@ -115,26 +121,46 @@ const taskData = {
     },
 }
 
+const getSchemas = async (mongoUri) => {
+    await mongooseV5017.connect(mongoUri);
+    await mongooseV5133.connect(mongoUri);
+    const schemaV5017BigSchema = mongooseV5017.Schema(bigSchema);
+    const schemaV5133BigSchema = mongooseV5133.Schema(bigSchema);
+    const schemaV5017UsersSchema = mongooseV5017.Schema(usersSchema);
+    const schemaV5133UsersSchema = mongooseV5133.Schema(usersSchema);
+    return [schemaV5017BigSchema, schemaV5133BigSchema, schemaV5017UsersSchema, schemaV5133UsersSchema].map(
+        schema => {
+            schema.plugin(mongooseLeanDefaultsPlugin);
+            schema.plugin(mongooseLeanVirtuals);
+            return schema;
+        }
+    )
+};
+
 const bigSchemaCreateBenchmark = async (mongoUri) => {
     const suite = new Benchmark.Suite(`big-schema-create ${mongoUri}`, {
         maxTime: 1
     });
-    await mongooseV5017.connect(mongoUri);
-    await mongooseV5133.connect(mongoUri);
-    const modelV5017 = mongooseV5017.model('BigSchemaModel', mongooseV5017.Schema(bigSchema))
-    const modelV5133 = mongooseV5133.model('BigSchemaModel', mongooseV5133.Schema(bigSchema))
+    const [schemaV5017BigSchema, schemaV5133BigSchema, schemaV5017UsersSchema, schemaV5133UsersSchema] = await getSchemas(mongoUri);
+
+    const modelV5017 = mongooseV5017.model('BigSchemaModel', schemaV5017BigSchema);
+    const modelV5133 = mongooseV5133.model('BigSchemaModel', schemaV5133BigSchema)
+    const modelUsersV5017 = mongooseV5017.model('UsersSchemaModel', schemaV5017UsersSchema)
+    const modelUsersV5133 = mongooseV5133.model('UsersSchemaModel', schemaV5133UsersSchema)
 
     suite.add('MongooseV5017 insert', {
         defer: true,
         fn: async function (deferred) {
-            create(modelV5017, taskData).then(() => deferred.resolve())
+            const refRes = await create(modelUsersV5017, taskData);
+            create(modelV5017, { ...taskData, refId: refRes._id }).then(() => deferred.resolve())
         }
     })
 
     suite.add('MongooseV5133 insert', {
         defer: true,
         fn: async function (deferred) {
-            create(modelV5133, taskData).then(() => deferred.resolve())
+            const refRes = await create(modelUsersV5133, taskData);
+            create(modelV5133, { ...taskData, refId: refRes._id }).then(() => deferred.resolve())
         }
     })
 
@@ -147,6 +173,8 @@ const bigSchemaCreateBenchmark = async (mongoUri) => {
                 console.log('Fastest is ' + this.filter('fastest').map('name'));
                 delete mongooseV5133.connection.models['BigSchemaModel'];
                 delete mongooseV5017.connection.models['BigSchemaModel'];
+                delete mongooseV5133.connection.models['UsersSchemaModel'];
+                delete mongooseV5017.connection.models['UsersSchemaModel'];
                 mongooseV5017.disconnect();
                 mongooseV5133.disconnect();
                 resolve()
@@ -159,22 +187,23 @@ const bigSchemaFindBenchmark = async (mongoUri) => {
     const suite = new Benchmark.Suite(`big-schema-find ${mongoUri}`, {
         maxTime: 1
     });
-    await mongooseV5017.connect(mongoUri);
-    await mongooseV5133.connect(mongoUri);
-    const modelV5017 = mongooseV5017.model('BigSchemaModel', mongooseV5017.Schema(bigSchema))
-    const modelV5133 = mongooseV5133.model('BigSchemaModel', mongooseV5133.Schema(bigSchema))
+    const [schemaV5017BigSchema, schemaV5133BigSchema, schemaV5017UsersSchema, schemaV5133UsersSchema] = await getSchemas(mongoUri);
+    const modelV5017 = mongooseV5017.model('BigSchemaModel', schemaV5017BigSchema)
+    const modelV5133 = mongooseV5133.model('BigSchemaModel', schemaV5133BigSchema)
+    mongooseV5017.model('UsersSchemaModel', schemaV5017UsersSchema)
+    mongooseV5133.model('UsersSchemaModel', schemaV5133UsersSchema)
 
     suite.add('MongooseV5017 find', {
         defer: true,
         fn: async function (deferred) {
-            find(modelV5017).then(() => deferred.resolve())
+            findAndPopulate(modelV5017).then(() => deferred.resolve())
         }
     })
 
     suite.add('MongooseV5133 find', {
         defer: true,
         fn: async function (deferred) {
-            find(modelV5133).then(() => deferred.resolve())
+            findAndPopulate(modelV5133).then(() => deferred.resolve())
         }
     })
 
@@ -187,6 +216,8 @@ const bigSchemaFindBenchmark = async (mongoUri) => {
                 console.log('Fastest is ' + this.filter('fastest').map('name'));
                 delete mongooseV5133.connection.models['BigSchemaModel'];
                 delete mongooseV5017.connection.models['BigSchemaModel'];
+                delete mongooseV5133.connection.models['UsersSchemaModel'];
+                delete mongooseV5017.connection.models['UsersSchemaModel'];
                 mongooseV5017.disconnect();
                 mongooseV5133.disconnect();
                 resolve()

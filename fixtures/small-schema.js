@@ -5,10 +5,6 @@ const mongooseV5133 = require('mongoose5.13.3')
 const {smallSchema} = require('./schemas');
 const {create, find} = require('../utils/mongoose')
 
-let mongooseV5017SmallSchemaTestInit = false;
-let mongooseV5133SmallSchemaTestInit = false;
-
-
 const smallSchemaCreateBenchmark = async (mongoUri) => {
     const suite = new Benchmark.Suite(`small-schema-create ${mongoUri}`, {
         maxTime: 1

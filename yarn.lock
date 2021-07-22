@@ -157,6 +157,13 @@ mongodb@3.6.10:
   optionalDependencies:
     saslprep "^1.0.0"
 
+mongoose-lean-virtuals@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/mongoose-lean-virtuals/-/mongoose-lean-virtuals-0.5.0.tgz#58d4ffefb3515d52889df7d104fadba82248c93f"
+  integrity sha512-IO0KsUXpzo8uhHnUgOlj0ShfYVjVZg1txaKRq/EtQcSQxvxjfuzkQ6XIQ2TvnyftJCewFV+2kcK3lU1NJraUnQ==
+  dependencies:
+    mpath "0.5.x"
+
 mongoose-legacy-pluralize@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/mongoose-legacy-pluralize/-/mongoose-legacy-pluralize-1.0.2.tgz#3ba9f91fa507b5186d399fb40854bff18fb563e4"
@@ -202,6 +209,11 @@ mpath@0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/mpath/-/mpath-0.4.1.tgz#ed10388430380bf7bbb5be1391e5d6969cb08e89"
   integrity sha512-NNY/MpBkALb9jJmjpBlIi6GRoLveLUM0pJzgbp9vY9F7IQEb/HREC/nxrixechcQwd1NevOhJnWWV8QQQRE+OA==
+
+mpath@0.5.x:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/mpath/-/mpath-0.5.2.tgz#b1eac586dffb5175d2f51ca9aacba35d9940dd41"
+  integrity sha512-NOeCoW6AYc3hLi30npe7uzbD9b4FQZKH40YKABUCCvaKKL5agj6YzvHoNx8jQpDMNPgIa5bvSZQbQpWBAVD0Kw==
 
 mpath@0.8.3:
   version "0.8.3"
